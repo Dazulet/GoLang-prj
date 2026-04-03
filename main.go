@@ -1,21 +1,33 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
+	"MangaLIb/config"
+	"MangaLIb/handlers"
+	"MangaLIb/models"
+
+	"github.com/gin-gonic/gin"
 )
 
-type Response struct {
-	Message string `json:"message"`
-}
-
-func helloHandler(w http.ResponseWriter, r *http.Request) {
-	response := Response{Message: "Hello, Go!"}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}
-
 func main() {
-	http.HandleFunc("/hello", helloHandler)
-	http.ListenAndServe(":8080", nil)
+	config.Connect()
+
+	config.DB.AutoMigrate(&models.Manga{}, &models.Chapter{}, &models.User{}, &models.Bookmark{})
+
+	r := gin.Default()
+
+	r.GET("/manga", handlers.GetMangas)
+	r.GET("/manga/:id", handlers.GetManga)
+	r.POST("/manga", handlers.CreateManga)
+	r.PUT("/manga/:id", handlers.UpdateManga)
+	r.DELETE("/manga/:id", handlers.DeleteManga)
+
+	r.POST("/chapters", handlers.CreateChapter)
+	r.GET("/manga/:id/chapters", handlers.GetChapters)
+
+	r.POST("/users", handlers.CreateUser)
+	r.POST("/bookmarks", handlers.AddBookmark)
+	r.GET("/users/:id/bookmarks", handlers.GetUserBookmarks)
+
+	// 4. Запуск
+	r.Run(":8080")
 }
