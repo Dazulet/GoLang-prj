@@ -28,6 +28,5 @@ func main() {
 	r.POST("/bookmarks", handlers.AddBookmark)
 	r.GET("/users/:id/bookmarks", handlers.GetUserBookmarks)
 
-	// 4. Запуск
 	r.Run(":8080")
 }
