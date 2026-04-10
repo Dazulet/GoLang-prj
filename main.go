@@ -15,18 +15,24 @@ func main() {
 
 	r := gin.Default()
 
-	r.GET("/manga", handlers.GetMangas)
-	r.GET("/manga/:id", handlers.GetManga)
-	r.POST("/manga", handlers.CreateManga)
-	r.PUT("/manga/:id", handlers.UpdateManga)
-	r.DELETE("/manga/:id", handlers.DeleteManga)
-
-	r.POST("/chapters", handlers.CreateChapter)
-	r.GET("/manga/:id/chapters", handlers.GetChapters)
-
 	r.POST("/users", handlers.CreateUser)
-	r.POST("/bookmarks", handlers.AddBookmark)
-	r.GET("/users/:id/bookmarks", handlers.GetUserBookmarks)
+	r.POST("/login", handlers.Login)
 
+	protected := r.Group("/")
+	protected.Use(handlers.AuthMiddleware())
+	{
+		protected.GET("/manga", handlers.GetMangas)
+		protected.GET("/manga/:id", handlers.GetManga)
+		protected.POST("/manga", handlers.CreateManga)
+		protected.PUT("/manga/:id", handlers.UpdateManga)
+		protected.DELETE("/manga/:id", handlers.DeleteManga)
+
+		protected.POST("/chapters", handlers.CreateChapter)
+		protected.GET("/manga/:id/chapters", handlers.GetChapters)
+
+		protected.POST("/bookmarks", handlers.AddBookmark)
+		protected.GET("/users/:id/bookmarks", handlers.GetUserBookmarks)
+	}
 	r.Run(":8080")
+
 }

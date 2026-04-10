@@ -4,9 +4,66 @@ import (
 	"MangaLIb/config"
 	"MangaLIb/models"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
+
+var jwtSecret = []byte("secret")
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString := c.GetHeader("Authorization")
+
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
+			c.Abort()
+			return
+		}
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return jwtSecret, nil
+		})
+
+		if token != nil && token.Valid {
+			c.Next()
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token", "details": err.Error()})
+			c.Abort()
+		}
+	}
+}
+
+func Login(c *gin.Context) {
+	var input models.User
+	c.ShouldBindJSON(&input)
+
+	var user models.User
+	err := config.DB.Where("email = ? AND password = ?", input.Email, input.Password).First(&user).Error
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный логин или пароль"})
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": user.Name,
+		"exp":      time.Now().Add(time.Hour * 1).Unix(),
+	})
+
+	tokenString, _ := token.SignedString(jwtSecret)
+
+	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+}
+
+func CreateUser(c *gin.Context) {
+	var user models.User
+	c.ShouldBindJSON(&user)
+
+	config.DB.Create(&user)
+	c.JSON(http.StatusCreated, user)
+}
 
 func GetMangas(c *gin.Context) {
 	var mangas []models.Manga
@@ -67,16 +124,6 @@ func GetChapters(c *gin.Context) {
 	mangaID := c.Param("id")
 	config.DB.Where("manga_id = ?", mangaID).Find(&chapters)
 	c.JSON(http.StatusOK, chapters)
-}
-
-func CreateUser(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	config.DB.Create(&user)
-	c.JSON(http.StatusCreated, user)
 }
 
 func AddBookmark(c *gin.Context) {
