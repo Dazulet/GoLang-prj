@@ -36,8 +36,14 @@ func AuthMiddleware() gin.HandlerFunc {
 }
 
 func Login(c *gin.Context) {
-	var input models.User
-	c.ShouldBindJSON(&input)
+	var input struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Неверный формат данных"})
+		return
+	}
 
 	var user models.User
 	err := config.DB.Where("email = ? AND password = ?", input.Email, input.Password).First(&user).Error
@@ -48,7 +54,7 @@ func Login(c *gin.Context) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": user.Name,
+		"username": user.Username, // Исправлено на Username
 		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 	})
 
@@ -59,9 +65,15 @@ func Login(c *gin.Context) {
 
 func CreateUser(c *gin.Context) {
 	var user models.User
-	c.ShouldBindJSON(&user)
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	config.DB.Create(&user)
+	if err := config.DB.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при создании пользователя: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, user)
 }
 
@@ -128,7 +140,10 @@ func GetChapters(c *gin.Context) {
 
 func AddBookmark(c *gin.Context) {
 	var bookmark models.Bookmark
-	c.ShouldBindJSON(&bookmark)
+	if err := c.ShouldBindJSON(&bookmark); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	config.DB.Create(&bookmark)
 	c.JSON(http.StatusCreated, gin.H{"status": "success"})
 }

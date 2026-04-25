@@ -34,5 +34,4 @@ func main() {
 		protected.GET("/users/:id/bookmarks", handlers.GetUserBookmarks)
 	}
 	r.Run(":8080")
-
 }

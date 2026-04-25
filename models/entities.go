@@ -5,7 +5,7 @@ type Manga struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Author      string    `json:"author"`
-	Chapters    []Chapter `json:"chapters"`
+	Chapters    []Chapter `json:"chapters" gorm:"foreignKey:MangaID"`
 }
 
 type Chapter struct {
@@ -17,7 +17,7 @@ type Chapter struct {
 
 type User struct {
 	ID       uint   `gorm:"primaryKey" json:"id"`
-	Name     string `json:"name"`
+	Username string `json:"username" gorm:"column:username"`
 	Email    string `gorm:"unique" json:"email"`
 	Password string `json:"password"`
 }
