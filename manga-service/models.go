@@ -1,11 +1,12 @@
-package models
+package main
 
 type Manga struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Author      string    `json:"author"`
-	Chapters    []Chapter `json:"chapters"`
+	Price       float64   `json:"price" gorm:"default:0"`
+	Chapters    []Chapter `json:"chapters" gorm:"foreignKey:MangaID"`
 }
 
 type Chapter struct {
@@ -15,14 +16,7 @@ type Chapter struct {
 	Number  int    `json:"number"`
 }
 
-type User struct {
-	ID       uint   `gorm:"primaryKey" json:"id"`
-	Name     string `json:"name"`
-	Email    string `gorm:"unique" json:"email"`
-	Password string `json:"password"`
-}
-
-type Bookmark struct {
-	UserID  uint `gorm:"primaryKey" json:"user_id"`
-	MangaID uint `gorm:"primaryKey" json:"manga_id"`
+type Genre struct {
+	ID   uint   `gorm:"primaryKey" json:"id"`
+	Name string `json:"name"`
 }
