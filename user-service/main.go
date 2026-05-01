@@ -18,7 +18,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 }
 
 func initDB() {
-	dsn := "host=localhost user=postgres password=11223344 dbname=GO-Manga port=5432 sslmode=disable"
+	dsn := "host=db user=postgres password=password dbname=mangalib_db port=5432 sslmode=disable"
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

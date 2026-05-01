@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mangalib_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  user-service:
+    build: ./user-service
+    container_name: user_service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+
+  manga-service:
+    build: ./manga-service
+    container_name: manga_service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+
+  order-service:
+    build: ./order-service
+    container_name: order_service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+
+volumes:
+  postgres_data:

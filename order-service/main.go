@@ -13,7 +13,6 @@ import (
 
 var jwtSecret = []byte("mangalib_secret_key")
 
-// Middleware для проверки токена
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -23,7 +22,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Убираем "Bearer " из строки
 		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -50,7 +48,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 }
 
 func initDB() {
-	dsn := "host=localhost user=postgres password=11223344 dbname=GO-Manga port=5432 sslmode=disable"
+	dsn := "host=db user=postgres password=password dbname=mangalib_db port=5432 sslmode=disable"
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
