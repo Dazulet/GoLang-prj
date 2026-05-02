@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("mangalib_secret_key") // Секретный ключ для подписи
+var jwtSecret = []byte("mangalib_secret_key")
 
 func Register(c *gin.Context) {
 	var user User
@@ -30,13 +30,11 @@ func Login(c *gin.Context) {
 	c.ShouldBindJSON(&input)
 
 	var user User
-	// Ищем пользователя по email и паролю
 	if err := DB.Where("email = ? AND password = ?", input.Email, input.Password).First(&user).Error; err != nil {
 		c.JSON(401, gin.H{"error": "Неверный email или пароль"})
 		return
 	}
 
-	// Создаем JWT токен
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
 		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Токен на 24 часа
