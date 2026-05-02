@@ -18,7 +18,7 @@ var mangaClient = resty.New().
 	})
 
 func CheckMangaExists(mangaId string) (bool, error) {
-	url := fmt.Sprintf("http://localhost:8082/manga/%s", mangaId)
+	url := fmt.Sprintf("http://manga-service:8082/manga/%s", mangaId)
 	resp, err := mangaClient.R().Get(url)
 	if err != nil {
 		return false, err

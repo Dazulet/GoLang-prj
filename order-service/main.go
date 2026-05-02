@@ -54,6 +54,7 @@ func initDB() {
 	if err != nil {
 		log.Fatal("Ошибка подключения к БД в Order-Service:", err)
 	}
+
 }
 
 func main() {

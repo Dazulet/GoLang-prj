@@ -55,6 +55,7 @@ func initDB() {
 		log.Fatal("Ошибка подключения к БД:", err)
 	}
 	log.Println("Manga-Service успешно подключен к базе данных")
+	DB.AutoMigrate(&Manga{}, &Chapter{})
 }
 
 func main() {

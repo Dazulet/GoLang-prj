@@ -18,7 +18,7 @@ var client = resty.New().
 	})
 
 func CheckUserExists(userId string) (bool, error) {
-	url := fmt.Sprintf("http://localhost:8081/users/%s", userId)
+	url := fmt.Sprintf("http://user-service:8081/users/%s", userId)
 	resp, err := client.R().Get(url)
 	if err != nil {
 		return false, err
