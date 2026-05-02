@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt" // Добавь это, если подчеркивает fmt ниже
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"order-service/clients"
+
+	"github.com/gin-gonic/gin"
 )
 
 func CreateOrder(c *gin.Context) {
@@ -14,22 +15,18 @@ func CreateOrder(c *gin.Context) {
 		return
 	}
 
-	// 1. ПРОВЕРКА ПОЛЬЗОВАТЕЛЯ через Resty (User-Service)
-	// Мы удалили строку userIdStr, так как используем order.UserID напрямую
 	userExists, _ := clients.CheckUserExists(fmt.Sprintf("%d", order.UserID))
 	if !userExists {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Такого пользователя не существует"})
 		return
 	}
 
-	// 2. ПРОВЕРКА МАНГИ через Resty (Manga-Service)
 	mangaExists, _ := clients.CheckMangaExists(fmt.Sprintf("%d", order.MangaID))
 	if !mangaExists {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Такой манги не существует"})
 		return
 	}
 
-	// 3. Если всё ок — создаем запись в БД заказов
 	order.Status = "created"
 	DB.Create(&order)
 

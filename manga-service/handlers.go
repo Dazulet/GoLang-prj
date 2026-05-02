@@ -58,7 +58,7 @@ func DeleteManga(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "Манга удалена"})
 }
 func (Manga) TableName() string {
-	return "mangas" // Явно говорим использовать таблицу mangas
+	return "mangas"
 }
 
 func (Chapter) TableName() string {
