@@ -1,0 +1,13 @@
+-- Manga Service Migration: 000001_create_genres_tags
+
+CREATE TABLE IF NOT EXISTS genres (
+    id   BIGSERIAL    PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    slug VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS tags (
+    id   BIGSERIAL    PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    slug VARCHAR(100) NOT NULL UNIQUE
+);

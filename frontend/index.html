@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MangaLib — Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f0f13;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    .logo { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; }
+    .logo span { color: #7c3aed; }
+
+    .tagline { color: #94a3b8; font-size: 1rem; }
+
+    .services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    .card {
+      background: #1e1e2e;
+      border: 1px solid #2d2d3f;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .card h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #7c3aed; margin-bottom: 0.5rem; }
+    .card p  { font-size: 0.9rem; color: #94a3b8; margin-bottom: 1rem; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-family: monospace;
+      background: #2d2d3f;
+      color: #a5b4fc;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .status { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.8rem; color: #94a3b8; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    .links { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .links a {
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 0.4rem 1rem;
+      border: 1px solid #3730a3;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .links a:hover { background: #1e1b4b; }
+  </style>
+</head>
+<body>
+
+  <div>
+    <div class="logo">Manga<span>Lib</span></div>
+    <p class="tagline">University Showcase — Go Microservices Backend</p>
+  </div>
+
+  <div class="services">
+    <div class="card">
+      <h3>🔐 Auth Service</h3>
+      <p>Handles registration, login and JWT token issuance.</p>
+      <span class="badge">:8081</span>
+      <div class="status"><span class="dot"></span> Running</div>
+    </div>
+    <div class="card">
+      <h3>📚 Manga Service</h3>
+      <p>Manga CRUD, chapters, pages, bookmarks, ratings and progress.</p>
+      <span class="badge">:8082</span>
+      <div class="status"><span class="dot"></span> Running</div>
+    </div>
+    <div class="card">
+      <h3>💬 Comment Service</h3>
+      <p>Threaded comments and likes. Calls Auth Service via Resty v2.</p>
+      <span class="badge">:8083</span>
+      <div class="status"><span class="dot"></span> Running</div>
+    </div>
+  </div>
+
+  <div class="links">
+    <a href="http://localhost:8081/health" target="_blank">Auth Health</a>
+    <a href="http://localhost:8082/health" target="_blank">Manga Health</a>
+    <a href="http://localhost:8083/health" target="_blank">Comment Health</a>
+    <a href="http://localhost:8082/api/manga" target="_blank">Browse Manga API</a>
+    <a href="http://localhost:8082/api/genres" target="_blank">Genres API</a>
+  </div>
+
+</body>
+</html>
