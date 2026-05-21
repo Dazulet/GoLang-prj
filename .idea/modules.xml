@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/MangaLIb.iml" filepath="$PROJECT_DIR$/.idea/MangaLIb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/mangalib.iml" filepath="$PROJECT_DIR$/.idea/mangalib.iml" />
     </modules>
   </component>
 </project>

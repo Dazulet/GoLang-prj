@@ -1,7 +1,0 @@
-CREATE TABLE chapters (
-    id SERIAL PRIMARY KEY,
-    manga_id INTEGER REFERENCES manga(id) ON DELETE CASCADE,
-    chapter_number FLOAT NOT NULL,
-    title VARCHAR(255),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);

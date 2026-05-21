@@ -1,50 +1,200 @@
-version: '3.8'
+version: "3.9"
 
-services:
-  db:
-    image: postgres:15-alpine
-    container_name: postgres_db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mangalib_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+# ============================================================
+#  MangaLib — Full Stack Docker Compose
+#  Services: frontend | auth | manga | comment | 3x postgres
+#  Run: docker-compose up --build
+# ============================================================
 
-  user-service:
-    build: ./user-service
-    container_name: user_service
-    ports:
-      - "8081:8081"
-    depends_on:
-      - db
-    environment:
-      - DB_HOST=db
-    restart: always
-
-  manga-service:
-    build: ./manga-service
-    container_name: manga_service
-    ports:
-      - "8082:8082"
-    depends_on:
-      - db
-    environment:
-      - DB_HOST=db
-    restart: always
-
-  order-service:
-    build: ./order-service
-    container_name: order_service
-    ports:
-      - "8083:8083"
-    depends_on:
-      - db
-    environment:
-      - DB_HOST=db
-    restart: always
+networks:
+  mangalib-net:
+    driver: bridge
 
 volumes:
-  postgres_data:
+  auth_db_data:
+  manga_db_data:
+  comment_db_data:
+  manga_uploads:
+
+services:
+
+  # ────────────────────────────────────────────────────────
+  #  Databases
+  # ────────────────────────────────────────────────────────
+
+  auth-db:
+    image: postgres:16-alpine
+    container_name: mangalib_auth_db
+    restart: unless-stopped
+    networks: [mangalib-net]
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_secret
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  manga-db:
+    image: postgres:16-alpine
+    container_name: mangalib_manga_db
+    restart: unless-stopped
+    networks: [mangalib-net]
+    environment:
+      POSTGRES_USER: manga_user
+      POSTGRES_PASSWORD: manga_secret
+      POSTGRES_DB: manga_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - manga_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U manga_user -d manga_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  comment-db:
+    image: postgres:16-alpine
+    container_name: mangalib_comment_db
+    restart: unless-stopped
+    networks: [mangalib-net]
+    environment:
+      POSTGRES_USER: comment_user
+      POSTGRES_PASSWORD: comment_secret
+      POSTGRES_DB: comment_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - comment_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comment_user -d comment_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ────────────────────────────────────────────────────────
+  #  Application Services
+  # ────────────────────────────────────────────────────────
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: mangalib_auth
+    restart: unless-stopped
+    networks: [mangalib-net]
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    environment:
+      APP_PORT: 8081
+      APP_ENV: development
+      DB_HOST: auth-db
+      DB_PORT: 5432
+      DB_USER: auth_user
+      DB_PASSWORD: auth_secret
+      DB_NAME: auth_db
+      DB_SSLMODE: disable
+      JWT_SECRET: shared-jwt-secret-change-in-production
+      JWT_EXPIRY_HOURS: 24
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  manga-service:
+    build:
+      context: ./manga-service
+      dockerfile: Dockerfile
+    container_name: mangalib_manga
+    restart: unless-stopped
+    networks: [mangalib-net]
+    depends_on:
+      manga-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    environment:
+      APP_PORT: 8082
+      APP_ENV: development
+      APP_BASE_URL: http://localhost:8082
+      DB_HOST: manga-db
+      DB_PORT: 5432
+      DB_USER: manga_user
+      DB_PASSWORD: manga_secret
+      DB_NAME: manga_db
+      DB_SSLMODE: disable
+      JWT_SECRET: shared-jwt-secret-change-in-production
+      # Resty v2 inter-service URL
+      AUTH_SERVICE_URL: http://auth-service:8081
+      UPLOAD_DIR: /app/uploads
+      MAX_UPLOAD_SIZE_MB: 10
+    ports:
+      - "8082:8082"
+    volumes:
+      - manga_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  comment-service:
+    build:
+      context: ./comment-service
+      dockerfile: Dockerfile
+    container_name: mangalib_comment
+    restart: unless-stopped
+    networks: [mangalib-net]
+    depends_on:
+      comment-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    environment:
+      APP_PORT: 8083
+      APP_ENV: development
+      DB_HOST: comment-db
+      DB_PORT: 5432
+      DB_USER: comment_user
+      DB_PASSWORD: comment_secret
+      DB_NAME: comment_db
+      DB_SSLMODE: disable
+      JWT_SECRET: shared-jwt-secret-change-in-production
+      # Resty v2 inter-service URL
+      AUTH_SERVICE_URL: http://auth-service:8081
+    ports:
+      - "8083:8083"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ────────────────────────────────────────────────────────
+  #  Frontend (nginx serving static HTML)
+  # ────────────────────────────────────────────────────────
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mangalib_frontend
+    restart: unless-stopped
+    networks: [mangalib-net]
+    depends_on:
+      - auth-service
+      - manga-service
+      - comment-service
+    ports:
+      - "3000:80"
