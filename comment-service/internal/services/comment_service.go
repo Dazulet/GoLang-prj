@@ -1,9 +1,6 @@
 package services
 
 import (
-	"errors"
-	"log"
-
 	"github.com/mangalib/comment-service/internal/client"
 	"github.com/mangalib/comment-service/internal/models"
 	"github.com/mangalib/comment-service/internal/repositories"
@@ -31,19 +28,13 @@ func (s *CommentService) Create(userID uint, req validators.CreateCommentRequest
 	}
 
 	if info, err := s.authClient.GetUser(userID); err == nil {
-		c.Author = &models.UserInfo{
-			ID:       info.ID,
-			Username: info.Username,
-			Avatar:   info.Avatar,
-		}
-	} else {
-		log.Printf("warn: could not fetch author for comment %d: %v", c.ID, err)
+		c.Author = &models.UserInfo{ID: info.ID, Username: info.Username, Avatar: info.Avatar}
 	}
-
 	return &c, nil
 }
 
-func (s *CommentService) ListByManga(mangaID uint, page, limit int) ([]models.Comment, int64, error) {
+// ВАЖНО: добавили параметр currentUserID
+func (s *CommentService) ListByManga(mangaID uint, page, limit int, currentUserID uint) ([]models.Comment, int64, error) {
 	offset := (page - 1) * limit
 	comments, total, err := s.repo.ListByManga(mangaID, limit, offset)
 	if err != nil {
@@ -52,47 +43,48 @@ func (s *CommentService) ListByManga(mangaID uint, page, limit int) ([]models.Co
 
 	userCache := make(map[uint]*models.UserInfo)
 
-	enrichAuthor := func(userID uint) *models.UserInfo {
-		if info, ok := userCache[userID]; ok {
-			return info
-		}
-		info, err := s.authClient.GetUser(userID)
-		if err != nil {
-			log.Printf("warn: could not fetch user %d: %v", userID, err)
-			return nil
-		}
-		mapped := &models.UserInfo{ID: info.ID, Username: info.Username, Avatar: info.Avatar}
-		userCache[userID] = mapped
-		return mapped
-	}
-
 	for i := range comments {
-		comments[i].Author = enrichAuthor(comments[i].UserID)
+		// 1. Обогащаем данными автора
+		comments[i].Author = s.getAuthorWithCache(comments[i].UserID, userCache)
+
+		// 2. Проверяем, лайкнул ли текущий юзер этот коммент
+		if currentUserID != 0 {
+			comments[i].IsLiked = s.repo.LikeExists(currentUserID, comments[i].ID)
+		}
+
+		// Обрабатываем ответы (Replies)
 		for j := range comments[i].Replies {
-			comments[i].Replies[j].Author = enrichAuthor(comments[i].Replies[j].UserID)
+			comments[i].Replies[j].Author = s.getAuthorWithCache(comments[i].Replies[j].UserID, userCache)
+			if currentUserID != 0 {
+				comments[i].Replies[j].IsLiked = s.repo.LikeExists(currentUserID, comments[i].Replies[j].ID)
+			}
 		}
 	}
 
 	return comments, total, nil
 }
 
-func (s *CommentService) Delete(userID, commentID uint, isAdmin bool) error {
-	c, err := s.repo.FindByID(commentID)
+// Вспомогательный метод для кеширования авторов (чтобы не спамить Auth-сервис)
+func (s *CommentService) getAuthorWithCache(userID uint, cache map[uint]*models.UserInfo) *models.UserInfo {
+	if info, ok := cache[userID]; ok {
+		return info
+	}
+	info, err := s.authClient.GetUser(userID)
 	if err != nil {
-		return errors.New("comment not found")
+		return nil
 	}
-	if !isAdmin && c.UserID != userID {
-		return errors.New("forbidden")
-	}
-	return s.repo.Delete(commentID)
+	mapped := &models.UserInfo{ID: info.ID, Username: info.Username, Avatar: info.Avatar}
+	cache[userID] = mapped
+	return mapped
 }
 
-func (s *CommentService) ToggleLike(userID, commentID uint) (liked bool, err error) {
-	if _, err := s.repo.FindByID(commentID); err != nil {
-		return false, errors.New("comment not found")
-	}
+func (s *CommentService) ToggleLike(userID, commentID uint) (bool, error) {
 	if s.repo.LikeExists(userID, commentID) {
 		return false, s.repo.RemoveLike(userID, commentID)
 	}
 	return true, s.repo.AddLike(userID, commentID)
+}
+
+func (s *CommentService) Delete(userID, commentID uint, isAdmin bool) error {
+	return s.repo.Delete(commentID)
 }

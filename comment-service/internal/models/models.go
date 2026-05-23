@@ -13,6 +13,7 @@ type Comment struct {
 	ParentID  *uint          `gorm:"index"                   json:"parent_id,omitempty"`
 	Body      string         `gorm:"type:text;not null"      json:"body"`
 	Likes     int            `gorm:"default:0"               json:"likes"`
+	IsLiked   bool           `gorm:"-" json:"is_liked"`
 	CreatedAt time.Time      `                               json:"created_at"`
 	UpdatedAt time.Time      `                               json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index"                   json:"-"`

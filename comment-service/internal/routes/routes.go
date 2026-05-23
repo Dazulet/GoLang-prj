@@ -35,7 +35,7 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	api := r.Group("/api")
 
-	api.GET("/comments", commentH.List)
+	api.GET("/comments", middleware.Auth(cfg.JWTSecret), commentH.List)
 
 	protected := api.Group("")
 	protected.Use(middleware.Auth(cfg.JWTSecret))

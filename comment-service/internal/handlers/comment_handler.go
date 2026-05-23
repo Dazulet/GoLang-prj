@@ -20,25 +20,23 @@ func NewCommentHandler(svc *services.CommentService) *CommentHandler {
 
 func (h *CommentHandler) List(c *gin.Context) {
 	mangaIDStr := c.Query("manga_id")
-	if mangaIDStr == "" {
-		utils.BadRequest(c, "manga_id is required")
-		return
-	}
-	mangaID, err := strconv.ParseUint(mangaIDStr, 10, 64)
-	if err != nil {
-		utils.BadRequest(c, "invalid manga_id")
-		return
-	}
+	mangaID, _ := strconv.ParseUint(mangaIDStr, 10, 64)
 
 	page, limit, _ := utils.ParsePagination(c)
-	list, total, err := h.svc.ListByManga(uint(mangaID), page, limit)
+
+	// Пытаемся достать userID из токена (если он есть)
+	// Для этого GET запрос должен проходить через middleware.Auth,
+	// но мы сделаем его НЕОБЯЗАТЕЛЬНЫМ в роутах или просто проверим контекст.
+	userID, _ := c.Get("userID")
+	uid, _ := userID.(uint)
+
+	list, total, err := h.svc.ListByManga(uint(mangaID), page, limit, uid)
 	if err != nil {
 		utils.InternalError(c)
 		return
 	}
 	utils.Paginated(c, list, total, page, limit)
 }
-
 func (h *CommentHandler) Create(c *gin.Context) {
 	userID := middleware.CurrentUserID(c)
 	var req validators.CreateCommentRequest

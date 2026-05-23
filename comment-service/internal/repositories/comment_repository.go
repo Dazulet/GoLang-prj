@@ -44,18 +44,20 @@ func (r *CommentRepository) LikeExists(userID, commentID uint) bool {
 }
 
 func (r *CommentRepository) AddLike(userID, commentID uint) error {
-	if err := r.db.Create(&models.CommentLike{UserID: userID, CommentID: commentID}).Error; err != nil {
-		return err
-	}
-	return r.db.Model(&models.Comment{}).Where("id = ?", commentID).
-		UpdateColumn("likes", gorm.Expr("likes + 1")).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&models.CommentLike{UserID: userID, CommentID: commentID}).Error; err != nil {
+			return err
+		}
+		// Обновляем именно таблицу comments поле likes
+		return tx.Exec("UPDATE comments SET likes = likes + 1 WHERE id = ?", commentID).Error
+	})
 }
 
 func (r *CommentRepository) RemoveLike(userID, commentID uint) error {
-	if err := r.db.Where("user_id = ? AND comment_id = ?", userID, commentID).
-		Delete(&models.CommentLike{}).Error; err != nil {
-		return err
-	}
-	return r.db.Model(&models.Comment{}).Where("id = ?", commentID).
-		UpdateColumn("likes", gorm.Expr("GREATEST(likes - 1, 0)")).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("user_id = ? AND comment_id = ?", userID, commentID).Delete(&models.CommentLike{}).Error; err != nil {
+			return err
+		}
+		return tx.Exec("UPDATE comments SET likes = GREATEST(likes - 1, 0) WHERE id = ?", commentID).Error
+	})
 }
