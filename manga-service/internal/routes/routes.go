@@ -78,7 +78,7 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	{
 		protected.GET("/bookmarks", bookmarkH.List)
 		protected.POST("/bookmarks", bookmarkH.Upsert)
-		protected.DELETE("/bookmarks/:id", bookmarkH.Remove)
+		protected.DELETE("/bookmarks/:mangaId", bookmarkH.Remove)
 
 		protected.POST("/ratings", ratingH.Upsert)
 		protected.GET("/ratings/manga/:id", ratingH.GetMine)

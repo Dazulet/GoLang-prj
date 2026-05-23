@@ -254,7 +254,11 @@ func NewBookmarkService(repo *repositories.BookmarkRepository) *BookmarkService 
 }
 
 func (s *BookmarkService) Upsert(userID uint, req validators.UpsertBookmarkRequest) (*models.Bookmark, error) {
-	b := models.Bookmark{UserID: userID, MangaID: req.MangaID, Status: models.BookmarkStatus(req.Status)}
+	b := models.Bookmark{
+		UserID:  userID,
+		MangaID: req.MangaID,
+		Status:  models.BookmarkStatus(req.Status),
+	}
 	return &b, s.repo.Upsert(&b)
 }
 
