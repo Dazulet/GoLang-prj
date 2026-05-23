@@ -14,8 +14,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// ── Response helpers ──────────────────────────────────────────────────────────
-
 type Response struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message,omitempty"`
@@ -71,8 +69,6 @@ func ParsePagination(c *gin.Context) (page, limit, offset int) {
 	return
 }
 
-// ── Slug ──────────────────────────────────────────────────────────────────────
-
 var nonAlphanumeric = regexp.MustCompile(`[^a-z0-9]+`)
 
 func Slugify(s string) string {
@@ -80,8 +76,6 @@ func Slugify(s string) string {
 	s = nonAlphanumeric.ReplaceAllString(s, "-")
 	return strings.Trim(s, "-")
 }
-
-// ── JWT (parse only — manga service never issues tokens) ─────────────────────
 
 type Claims struct {
 	UserID uint   `json:"user_id"`
@@ -103,7 +97,6 @@ func ParseToken(tokenStr, secret string) (*Claims, error) {
 	if !ok || !token.Valid {
 		return nil, errors.New("invalid token")
 	}
-	// Extra expiry guard
 	if claims.ExpiresAt != nil && claims.ExpiresAt.Before(time.Now()) {
 		return nil, errors.New("token expired")
 	}

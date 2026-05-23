@@ -20,8 +20,6 @@ func init() {
 	gin.SetMode(gin.TestMode)
 }
 
-// ── helpers ───────────────────────────────────────────────────────────────────
-
 func makeBody(v any) *bytes.Buffer {
 	b, _ := json.Marshal(v)
 	return bytes.NewBuffer(b)
@@ -36,8 +34,6 @@ func parseResponse(t *testing.T, w *httptest.ResponseRecorder) map[string]any {
 
 const testSecret = "test-jwt-secret"
 
-// ── Test 1: GenerateToken produces a parseable JWT ────────────────────────────
-
 func TestGenerateToken_Valid(t *testing.T) {
 	token, err := utils.GenerateToken(42, "user", testSecret, 24)
 	require.NoError(t, err)
@@ -49,18 +45,13 @@ func TestGenerateToken_Valid(t *testing.T) {
 	assert.Equal(t, "user", claims.Role)
 }
 
-// ── Test 2: ParseToken rejects wrong secret ───────────────────────────────────
-
 func TestParseToken_WrongSecret(t *testing.T) {
 	token, _ := utils.GenerateToken(1, "user", testSecret, 24)
 	_, err := utils.ParseToken(token, "wrong-secret")
 	assert.Error(t, err)
 }
 
-// ── Test 3: ParseToken rejects expired token ──────────────────────────────────
-
 func TestParseToken_Expired(t *testing.T) {
-	// Generate a token that expired 1 hour ago
 	claims := utils.Claims{
 		UserID: 99,
 		Role:   "user",
@@ -76,8 +67,6 @@ func TestParseToken_Expired(t *testing.T) {
 	assert.Error(t, err, "expired token must be rejected")
 }
 
-// ── Test 4: HashPassword + CheckPassword round-trip ──────────────────────────
-
 func TestPasswordHashing(t *testing.T) {
 	hash, err := utils.HashPassword("super-secret-123")
 	require.NoError(t, err)
@@ -85,8 +74,6 @@ func TestPasswordHashing(t *testing.T) {
 	assert.True(t, utils.CheckPassword(hash, "super-secret-123"))
 	assert.False(t, utils.CheckPassword(hash, "wrong-password"))
 }
-
-// ── Test 5: Auth middleware rejects missing Authorization header ──────────────
 
 func TestAuthMiddleware_MissingHeader(t *testing.T) {
 	router := gin.New()
@@ -102,8 +89,6 @@ func TestAuthMiddleware_MissingHeader(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-// ── Test 6: Auth middleware rejects malformed Bearer token ────────────────────
-
 func TestAuthMiddleware_InvalidToken(t *testing.T) {
 	router := gin.New()
 	router.Use(authMiddlewareForTest(testSecret))
@@ -118,8 +103,6 @@ func TestAuthMiddleware_InvalidToken(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
-
-// ── Test 7: Auth middleware passes valid token ────────────────────────────────
 
 func TestAuthMiddleware_ValidToken(t *testing.T) {
 	token, _ := utils.GenerateToken(7, "user", testSecret, 24)
@@ -137,8 +120,6 @@ func TestAuthMiddleware_ValidToken(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 }
-
-// ── Test 8: Register endpoint rejects short password ─────────────────────────
 
 func TestRegisterHandler_ShortPassword(t *testing.T) {
 	router := setupRegisterRouter()
@@ -158,8 +139,6 @@ func TestRegisterHandler_ShortPassword(t *testing.T) {
 	assert.Equal(t, false, resp["success"])
 }
 
-// ── Test 9: Register endpoint rejects invalid email ───────────────────────────
-
 func TestRegisterHandler_InvalidEmail(t *testing.T) {
 	router := setupRegisterRouter()
 
@@ -176,8 +155,6 @@ func TestRegisterHandler_InvalidEmail(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// ── Test 10: Login endpoint rejects empty body ────────────────────────────────
-
 func TestLoginHandler_EmptyBody(t *testing.T) {
 	router := setupLoginRouter()
 
@@ -189,8 +166,6 @@ func TestLoginHandler_EmptyBody(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// ── Test 11: Validate endpoint rejects missing token field ────────────────────
-
 func TestValidateHandler_MissingToken(t *testing.T) {
 	router := setupValidateRouter()
 
@@ -201,8 +176,6 @@ func TestValidateHandler_MissingToken(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
-
-// ── Test 12: Validate endpoint returns claims for a valid token ───────────────
 
 func TestValidateHandler_ValidToken(t *testing.T) {
 	token, _ := utils.GenerateToken(55, "admin", testSecret, 24)
@@ -219,10 +192,6 @@ func TestValidateHandler_ValidToken(t *testing.T) {
 	assert.Equal(t, true, resp["success"])
 }
 
-// ── Internal test routers (no real DB needed) ─────────────────────────────────
-
-// authMiddlewareForTest is a self-contained copy of the auth middleware
-// that can run without importing the full middleware package in tests.
 func authMiddlewareForTest(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.GetHeader("Authorization")

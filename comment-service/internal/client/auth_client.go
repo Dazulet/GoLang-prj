@@ -1,5 +1,3 @@
-// Package client provides HTTP clients for communicating with other
-// MangaLib microservices using the Resty v2 library.
 package client
 
 import (
@@ -9,15 +7,11 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// ── Shared response envelope ──────────────────────────────────────────────────
-
 type apiResponse[T any] struct {
 	Success bool   `json:"success"`
 	Message string `json:"message,omitempty"`
 	Data    T      `json:"data"`
 }
-
-// ── UserInfo (matches auth-service public profile) ────────────────────────────
 
 type UserInfo struct {
 	ID       uint   `json:"id"`
@@ -25,17 +19,11 @@ type UserInfo struct {
 	Avatar   string `json:"avatar,omitempty"`
 }
 
-// ── AuthClient ────────────────────────────────────────────────────────────────
-
-// AuthClient is a Resty v2-based HTTP client for the Auth Service.
-// It is used by the Comment Service to fetch user profiles and validate tokens.
 type AuthClient struct {
 	client  *resty.Client
 	baseURL string
 }
 
-// NewAuthClient constructs an AuthClient pointed at the given base URL.
-// All requests time out after 5 seconds and retry once on transient failures.
 func NewAuthClient(baseURL string) *AuthClient {
 	r := resty.New().
 		SetBaseURL(baseURL).
@@ -48,8 +36,6 @@ func NewAuthClient(baseURL string) *AuthClient {
 	return &AuthClient{client: r, baseURL: baseURL}
 }
 
-// GetUser fetches the public profile of a user from the Auth Service.
-// Primary inter-service call: Comment Service -> Auth Service.
 func (c *AuthClient) GetUser(userID uint) (*UserInfo, error) {
 	var result apiResponse[UserInfo]
 
@@ -73,14 +59,11 @@ func (c *AuthClient) GetUser(userID uint) (*UserInfo, error) {
 	return &result.Data, nil
 }
 
-// TokenClaims holds decoded JWT data returned by the Auth Service validate endpoint.
 type TokenClaims struct {
 	UserID uint   `json:"user_id"`
 	Role   string `json:"role"`
 }
 
-// ValidateToken asks the Auth Service to validate a raw JWT string.
-// Returns decoded user_id and role on success.
 func (c *AuthClient) ValidateToken(token string) (*TokenClaims, error) {
 	var result apiResponse[TokenClaims]
 

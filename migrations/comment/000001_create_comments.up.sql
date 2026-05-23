@@ -1,4 +1,3 @@
--- Comment Service Migration: 000001_create_comments
 
 CREATE TABLE IF NOT EXISTS comments (
     id         BIGSERIAL   PRIMARY KEY,

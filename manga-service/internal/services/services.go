@@ -11,8 +11,6 @@ import (
 	"github.com/mangalib/manga-service/internal/validators"
 )
 
-// ── MangaService ──────────────────────────────────────────────────────────────
-
 type MangaService struct {
 	manga  *repositories.MangaRepository
 	genres *repositories.GenreRepository
@@ -155,8 +153,6 @@ func (s *MangaService) enrichRating(m *models.Manga) {
 	}
 }
 
-// ── ChapterService ────────────────────────────────────────────────────────────
-
 type ChapterService struct {
 	chapters *repositories.ChapterRepository
 	pages    *repositories.PageRepository
@@ -225,8 +221,6 @@ func (s *ChapterService) AddPages(chapterID, mangaID uint, filePaths []string, b
 	return pages, s.pages.CreateBatch(pages)
 }
 
-// ── GenreService ──────────────────────────────────────────────────────────────
-
 type GenreService struct{ repo *repositories.GenreRepository }
 
 func NewGenreService(repo *repositories.GenreRepository) *GenreService {
@@ -240,8 +234,6 @@ func (s *GenreService) Create(req validators.CreateGenreRequest) (*models.Genre,
 
 func (s *GenreService) List() ([]models.Genre, error) { return s.repo.FindAll() }
 
-// ── TagService ────────────────────────────────────────────────────────────────
-
 type TagService struct{ repo *repositories.TagRepository }
 
 func NewTagService(repo *repositories.TagRepository) *TagService { return &TagService{repo: repo} }
@@ -252,8 +244,6 @@ func (s *TagService) Create(req validators.CreateTagRequest) (*models.Tag, error
 }
 
 func (s *TagService) List() ([]models.Tag, error) { return s.repo.FindAll() }
-
-// ── BookmarkService ───────────────────────────────────────────────────────────
 
 type BookmarkService struct {
 	repo *repositories.BookmarkRepository
@@ -276,8 +266,6 @@ func (s *BookmarkService) ListByUser(userID uint, page, limit int) ([]models.Boo
 	return s.repo.ListByUser(userID, limit, (page-1)*limit)
 }
 
-// ── RatingService ─────────────────────────────────────────────────────────────
-
 type RatingService struct {
 	repo *repositories.RatingRepository
 }
@@ -294,8 +282,6 @@ func (s *RatingService) Upsert(userID uint, req validators.UpsertRatingRequest) 
 func (s *RatingService) GetByManga(userID, mangaID uint) (*models.Rating, error) {
 	return s.repo.FindByUserAndManga(userID, mangaID)
 }
-
-// ── ProgressService ───────────────────────────────────────────────────────────
 
 type ProgressService struct {
 	repo *repositories.ProgressRepository

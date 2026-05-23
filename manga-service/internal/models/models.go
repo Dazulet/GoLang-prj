@@ -6,8 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// ── Genre & Tag ───────────────────────────────────────────────────────────────
-
 type Genre struct {
 	ID    uint    `gorm:"primaryKey"                    json:"id"`
 	Name  string  `gorm:"uniqueIndex;size:100;not null"  json:"name"`
@@ -21,8 +19,6 @@ type Tag struct {
 	Slug  string  `gorm:"uniqueIndex;size:100;not null"  json:"slug"`
 	Manga []Manga `gorm:"many2many:manga_tags;"          json:"-"`
 }
-
-// ── Manga ─────────────────────────────────────────────────────────────────────
 
 type MangaStatus string
 
@@ -55,13 +51,10 @@ type Manga struct {
 	Chapters []Chapter `gorm:"foreignKey:MangaID"      json:"chapters,omitempty"`
 	Ratings  []Rating  `gorm:"foreignKey:MangaID"      json:"-"`
 
-	// Computed by service layer
 	AvgRating     float64 `gorm:"-" json:"avg_rating,omitempty"`
 	TotalRatings  int     `gorm:"-" json:"total_ratings,omitempty"`
 	TotalChapters int64   `gorm:"-" json:"total_chapters,omitempty"`
 }
-
-// ── Chapter ───────────────────────────────────────────────────────────────────
 
 type Chapter struct {
 	ID        uint           `gorm:"primaryKey"       json:"id"`
@@ -77,8 +70,6 @@ type Chapter struct {
 	Pages []Page `gorm:"foreignKey:ChapterID;constraint:OnDelete:CASCADE" json:"pages,omitempty"`
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-
 type Page struct {
 	ID        uint   `gorm:"primaryKey"       json:"id"`
 	ChapterID uint   `gorm:"not null;index"   json:"chapter_id"`
@@ -87,8 +78,6 @@ type Page struct {
 	Width     int    `                        json:"width,omitempty"`
 	Height    int    `                        json:"height,omitempty"`
 }
-
-// ── Bookmark ──────────────────────────────────────────────────────────────────
 
 type BookmarkStatus string
 
@@ -111,8 +100,6 @@ type Bookmark struct {
 	Manga Manga `gorm:"foreignKey:MangaID" json:"manga,omitempty"`
 }
 
-// ── Rating ────────────────────────────────────────────────────────────────────
-
 type Rating struct {
 	ID        uint      `gorm:"primaryKey"                                   json:"id"`
 	UserID    uint      `gorm:"not null;uniqueIndex:idx_user_manga_rating"   json:"user_id"`
@@ -121,8 +108,6 @@ type Rating struct {
 	CreatedAt time.Time `                                                    json:"created_at"`
 	UpdatedAt time.Time `                                                    json:"updated_at"`
 }
-
-// ── Reading Progress ──────────────────────────────────────────────────────────
 
 type ReadingProgress struct {
 	ID         uint      `gorm:"primaryKey"                                        json:"id"`

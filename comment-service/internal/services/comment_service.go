@@ -30,7 +30,6 @@ func (s *CommentService) Create(userID uint, req validators.CreateCommentRequest
 		return nil, err
 	}
 
-	// Best-effort: enrich with author info
 	if info, err := s.authClient.GetUser(userID); err == nil {
 		c.Author = &models.UserInfo{
 			ID:       info.ID,
@@ -51,9 +50,6 @@ func (s *CommentService) ListByManga(mangaID uint, page, limit int) ([]models.Co
 		return nil, 0, err
 	}
 
-	// Enrich top-level comments with author info.
-	// Replies are enriched in a follow-up pass.
-	// Auth service calls are best-effort — a failed lookup doesn't fail the request.
 	userCache := make(map[uint]*models.UserInfo)
 
 	enrichAuthor := func(userID uint) *models.UserInfo {

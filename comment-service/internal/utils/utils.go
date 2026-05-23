@@ -12,8 +12,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// ── Response helpers ──────────────────────────────────────────────────────────
-
 type Response struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message,omitempty"`
@@ -68,8 +66,6 @@ func ParsePagination(c *gin.Context) (page, limit, offset int) {
 	offset = (page - 1) * limit
 	return
 }
-
-// ── JWT (parse only) ──────────────────────────────────────────────────────────
 
 type Claims struct {
 	UserID uint   `json:"user_id"`

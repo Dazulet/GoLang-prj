@@ -18,7 +18,6 @@ func NewCommentHandler(svc *services.CommentService) *CommentHandler {
 	return &CommentHandler{svc: svc}
 }
 
-// GET /api/comments?manga_id=1&page=1&limit=20
 func (h *CommentHandler) List(c *gin.Context) {
 	mangaIDStr := c.Query("manga_id")
 	if mangaIDStr == "" {
@@ -40,7 +39,6 @@ func (h *CommentHandler) List(c *gin.Context) {
 	utils.Paginated(c, list, total, page, limit)
 }
 
-// POST /api/comments
 func (h *CommentHandler) Create(c *gin.Context) {
 	userID := middleware.CurrentUserID(c)
 	var req validators.CreateCommentRequest
@@ -56,7 +54,6 @@ func (h *CommentHandler) Create(c *gin.Context) {
 	utils.Created(c, comment)
 }
 
-// DELETE /api/comments/:id
 func (h *CommentHandler) Delete(c *gin.Context) {
 	userID := middleware.CurrentUserID(c)
 	isAdmin := middleware.CurrentUserRole(c) == "admin"
@@ -81,7 +78,6 @@ func (h *CommentHandler) Delete(c *gin.Context) {
 	utils.NoContent(c)
 }
 
-// POST /api/comments/:id/like
 func (h *CommentHandler) Like(c *gin.Context) {
 	userID := middleware.CurrentUserID(c)
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)

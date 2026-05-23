@@ -32,8 +32,6 @@ func parseResp(t *testing.T, w *httptest.ResponseRecorder) map[string]any {
 	return out
 }
 
-// ── Test 1: Slugify utility ───────────────────────────────────────────────────
-
 func TestSlugify(t *testing.T) {
 	cases := []struct{ in, want string }{
 		{"One Piece", "one-piece"},
@@ -45,8 +43,6 @@ func TestSlugify(t *testing.T) {
 		assert.Equal(t, tc.want, utils.Slugify(tc.in), "input: %q", tc.in)
 	}
 }
-
-// ── Test 2: ParsePagination defaults ─────────────────────────────────────────
 
 func TestParsePagination_Defaults(t *testing.T) {
 	r := gin.New()
@@ -65,8 +61,6 @@ func TestParsePagination_Defaults(t *testing.T) {
 	assert.Equal(t, float64(0), resp["offset"])
 }
 
-// ── Test 3: ParsePagination respects custom values ────────────────────────────
-
 func TestParsePagination_Custom(t *testing.T) {
 	r := gin.New()
 	r.GET("/test", func(c *gin.Context) {
@@ -84,8 +78,6 @@ func TestParsePagination_Custom(t *testing.T) {
 	assert.Equal(t, float64(20), resp["offset"])
 }
 
-// ── Test 4: ParsePagination clamps limit to 100 ───────────────────────────────
-
 func TestParsePagination_LimitClamped(t *testing.T) {
 	r := gin.New()
 	r.GET("/test", func(c *gin.Context) {
@@ -101,8 +93,6 @@ func TestParsePagination_LimitClamped(t *testing.T) {
 	assert.Equal(t, float64(20), resp["limit"], "limit above 100 must default to 20")
 }
 
-// ── Test 5: Create manga — missing required field ─────────────────────────────
-
 func TestCreateManga_MissingTitle(t *testing.T) {
 	router := setupMangaRouter()
 
@@ -117,8 +107,6 @@ func TestCreateManga_MissingTitle(t *testing.T) {
 	resp := parseResp(t, w)
 	assert.Equal(t, false, resp["success"])
 }
-
-// ── Test 6: Create manga — invalid status enum ────────────────────────────────
 
 func TestCreateManga_InvalidStatus(t *testing.T) {
 	router := setupMangaRouter()
@@ -136,8 +124,6 @@ func TestCreateManga_InvalidStatus(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// ── Test 7: Protected route rejects unauthenticated request ──────────────────
-
 func TestProtectedRoute_NoToken(t *testing.T) {
 	router := setupMangaRouter()
 
@@ -151,14 +137,11 @@ func TestProtectedRoute_NoToken(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-// ── Test 8: Admin-only route rejects regular user token ───────────────────────
-
 func TestAdminRoute_UserToken_Forbidden(t *testing.T) {
 	router := setupMangaRouter()
 	userToken, _ := utils.ParseToken("", testSecret) // trigger error path
 	_ = userToken
 
-	// Build a real user-role token
 	token, err := buildToken(99, "user")
 	require.NoError(t, err)
 
@@ -171,8 +154,6 @@ func TestAdminRoute_UserToken_Forbidden(t *testing.T) {
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
-
-// ── Test 9: Health endpoint returns 200 ──────────────────────────────────────
 
 func TestHealthEndpoint(t *testing.T) {
 	router := setupMangaRouter()
@@ -187,8 +168,6 @@ func TestHealthEndpoint(t *testing.T) {
 	assert.Equal(t, "ok", resp["status"])
 }
 
-// ── Test 10: Chapter creation rejects negative chapter number ─────────────────
-
 func TestCreateChapter_NegativeNumber(t *testing.T) {
 	router := setupMangaRouter()
 
@@ -201,8 +180,6 @@ func TestCreateChapter_NegativeNumber(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
-
-// ── Test 11: OK response helper wraps data correctly ─────────────────────────
 
 func TestResponseHelper_OK(t *testing.T) {
 	r := gin.New()
@@ -221,8 +198,6 @@ func TestResponseHelper_OK(t *testing.T) {
 	assert.Equal(t, "Luffy", data["name"])
 }
 
-// ── Test 12: Error response helper ───────────────────────────────────────────
-
 func TestResponseHelper_NotFound(t *testing.T) {
 	r := gin.New()
 	r.GET("/test", func(c *gin.Context) {
@@ -237,8 +212,6 @@ func TestResponseHelper_NotFound(t *testing.T) {
 	assert.Equal(t, false, resp["success"])
 	assert.Equal(t, "manga not found", resp["message"])
 }
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 func buildToken(userID uint, role string) (string, error) {
 	return utils.GenerateToken(userID, role, testSecret, 24)

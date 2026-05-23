@@ -12,8 +12,6 @@ import (
 	"github.com/mangalib/auth-service/internal/validators"
 )
 
-// ── AuthHandler ───────────────────────────────────────────────────────────────
-
 type AuthHandler struct {
 	auth *services.AuthService
 }
@@ -62,7 +60,7 @@ func (h *UserHandler) UpdateUserProfile(c *gin.Context) {
 		user.Bio = req.Bio
 	}
 
-	if err := h.users.Update(user); err != nil { // Метод Update в UserService должен существовать
+	if err := h.users.Update(user); err != nil {
 		utils.InternalError(c)
 		return
 	}
@@ -70,7 +68,6 @@ func (h *UserHandler) UpdateUserProfile(c *gin.Context) {
 	utils.OK(c, user)
 }
 
-// POST /api/auth/register
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req validators.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -85,7 +82,6 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	utils.Created(c, result)
 }
 
-// POST /api/auth/login
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req validators.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -100,8 +96,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	utils.OK(c, result)
 }
 
-// POST /api/auth/validate
-// Called internally by other services to validate a JWT and get user info.
 func (h *AuthHandler) Validate(c *gin.Context) {
 	var body struct {
 		Token string `json:"token" binding:"required"`
@@ -121,8 +115,6 @@ func (h *AuthHandler) Validate(c *gin.Context) {
 	})
 }
 
-// ── UserHandler ───────────────────────────────────────────────────────────────
-
 type UserHandler struct {
 	users *services.UserService
 }
@@ -131,7 +123,6 @@ func NewUserHandler(users *services.UserService) *UserHandler {
 	return &UserHandler{users: users}
 }
 
-// GET /api/users/me
 func (h *UserHandler) Me(c *gin.Context) {
 	userID := middleware.CurrentUserID(c)
 	user, err := h.users.GetProfile(userID)
@@ -142,7 +133,6 @@ func (h *UserHandler) Me(c *gin.Context) {
 	utils.OK(c, user)
 }
 
-// GET /api/users/:id  (public — used by other services to fetch user info)
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -157,7 +147,6 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	utils.OK(c, user)
 }
 
-// PATCH /api/users/me
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	userID := middleware.CurrentUserID(c)
 	var req validators.UpdateProfileRequest

@@ -32,8 +32,6 @@ func parseResp(t *testing.T, w *httptest.ResponseRecorder) map[string]any {
 	return out
 }
 
-// ── Test 1: Comment creation requires manga_id ────────────────────────────────
-
 func TestCreateComment_MissingMangaID(t *testing.T) {
 	router := setupCommentRouter()
 	token := adminToken(t)
@@ -50,8 +48,6 @@ func TestCreateComment_MissingMangaID(t *testing.T) {
 	assert.Equal(t, false, resp["success"])
 }
 
-// ── Test 2: Comment creation requires non-empty body ─────────────────────────
-
 func TestCreateComment_EmptyBody(t *testing.T) {
 	router := setupCommentRouter()
 
@@ -65,8 +61,6 @@ func TestCreateComment_EmptyBody(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// ── Test 3: Comment creation requires auth ────────────────────────────────────
-
 func TestCreateComment_Unauthenticated(t *testing.T) {
 	router := setupCommentRouter()
 
@@ -74,13 +68,10 @@ func TestCreateComment_Unauthenticated(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/comments",
 		makeBody(map[string]any{"manga_id": 1, "body": "Hello"}))
 	req.Header.Set("Content-Type", "application/json")
-	// No Authorization header
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
-
-// ── Test 4: Delete comment — unauthenticated ──────────────────────────────────
 
 func TestDeleteComment_Unauthenticated(t *testing.T) {
 	router := setupCommentRouter()
@@ -92,8 +83,6 @@ func TestDeleteComment_Unauthenticated(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-// ── Test 5: List comments — manga_id required ─────────────────────────────────
-
 func TestListComments_MissingMangaID(t *testing.T) {
 	router := setupCommentRouter()
 
@@ -104,8 +93,6 @@ func TestListComments_MissingMangaID(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// ── Test 6: List comments — valid manga_id accepted ───────────────────────────
-
 func TestListComments_ValidMangaID(t *testing.T) {
 	router := setupCommentRouter()
 
@@ -113,11 +100,8 @@ func TestListComments_ValidMangaID(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/comments?manga_id=1", nil)
 	router.ServeHTTP(w, req)
 
-	// Router returns stub 200 when manga_id is present
 	assert.Equal(t, http.StatusOK, w.Code)
 }
-
-// ── Test 7: Like endpoint requires auth ───────────────────────────────────────
 
 func TestLikeComment_Unauthenticated(t *testing.T) {
 	router := setupCommentRouter()
@@ -128,8 +112,6 @@ func TestLikeComment_Unauthenticated(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
-
-// ── Test 8: Auth middleware passes valid token ────────────────────────────────
 
 func TestAuthMiddleware_ValidToken(t *testing.T) {
 	token, err := utils.GenerateToken(5, "user", testSecret, 24)
@@ -149,8 +131,6 @@ func TestAuthMiddleware_ValidToken(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-// ── Test 9: Auth middleware blocks wrong secret ───────────────────────────────
-
 func TestAuthMiddleware_WrongSecret(t *testing.T) {
 	token, _ := utils.GenerateToken(5, "user", "different-secret", 24)
 
@@ -168,8 +148,6 @@ func TestAuthMiddleware_WrongSecret(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-// ── Test 10: Health endpoint ──────────────────────────────────────────────────
-
 func TestHealthEndpoint(t *testing.T) {
 	router := setupCommentRouter()
 
@@ -181,8 +159,6 @@ func TestHealthEndpoint(t *testing.T) {
 	resp := parseResp(t, w)
 	assert.Equal(t, "comment", resp["service"])
 }
-
-// ── Test 11: Comment body max length validation ───────────────────────────────
 
 func TestCreateComment_TooLong(t *testing.T) {
 	router := setupCommentRouter()
@@ -201,8 +177,6 @@ func TestCreateComment_TooLong(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
-
-// ── Test 12: Paginated response structure ─────────────────────────────────────
 
 func TestPaginatedResponseStructure(t *testing.T) {
 	r := gin.New()
@@ -224,8 +198,6 @@ func TestPaginatedResponseStructure(t *testing.T) {
 	assert.Equal(t, float64(50), pagination["total"])
 	assert.Equal(t, float64(5), pagination["total_pages"])
 }
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 func adminToken(t *testing.T) string {
 	t.Helper()
@@ -259,7 +231,6 @@ func setupCommentRouter() *gin.Engine {
 		c.JSON(http.StatusOK, gin.H{"service": "comment", "status": "ok"})
 	})
 
-	// Public
 	r.GET("/api/comments", func(c *gin.Context) {
 		if c.Query("manga_id") == "" {
 			utils.BadRequest(c, "manga_id is required")
@@ -268,7 +239,6 @@ func setupCommentRouter() *gin.Engine {
 		utils.Paginated(c, []any{}, 0, 1, 20)
 	})
 
-	// Protected group
 	protected := r.Group("")
 	protected.Use(inlineAuthMW(testSecret))
 

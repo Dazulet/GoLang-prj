@@ -1,4 +1,3 @@
--- Manga Service Migration: 000001_create_genres_tags
 
 CREATE TABLE IF NOT EXISTS genres (
     id   BIGSERIAL    PRIMARY KEY,

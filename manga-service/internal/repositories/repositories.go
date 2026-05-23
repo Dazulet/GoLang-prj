@@ -5,8 +5,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// ── MangaFilter ───────────────────────────────────────────────────────────────
-
 type MangaFilter struct {
 	Search  string
 	Status  string
@@ -14,8 +12,6 @@ type MangaFilter struct {
 	SortBy  string
 	SortDir string
 }
-
-// ── MangaRepository ───────────────────────────────────────────────────────────
 
 type MangaRepository struct{ db *gorm.DB }
 
@@ -95,8 +91,6 @@ func (r *MangaRepository) AggregateRating(mangaID uint) (avg float64, count int,
 	return
 }
 
-// ── ChapterRepository ─────────────────────────────────────────────────────────
-
 type ChapterRepository struct{ db *gorm.DB }
 
 func NewChapterRepository(db *gorm.DB) *ChapterRepository { return &ChapterRepository{db: db} }
@@ -135,8 +129,6 @@ func (r *ChapterRepository) CountByManga(mangaID uint) (int64, error) {
 	return n, err
 }
 
-// ── PageRepository ────────────────────────────────────────────────────────────
-
 type PageRepository struct{ db *gorm.DB }
 
 func NewPageRepository(db *gorm.DB) *PageRepository { return &PageRepository{db: db} }
@@ -146,8 +138,6 @@ func (r *PageRepository) CreateBatch(pages []models.Page) error { return r.db.Cr
 func (r *PageRepository) DeleteByChapter(chapterID uint) error {
 	return r.db.Where("chapter_id = ?", chapterID).Delete(&models.Page{}).Error
 }
-
-// ── GenreRepository ───────────────────────────────────────────────────────────
 
 type GenreRepository struct{ db *gorm.DB }
 
@@ -165,8 +155,6 @@ func (r *GenreRepository) FindByIDs(ids []uint) ([]models.Genre, error) {
 	return genres, r.db.Where("id IN ?", ids).Find(&genres).Error
 }
 
-// ── TagRepository ─────────────────────────────────────────────────────────────
-
 type TagRepository struct{ db *gorm.DB }
 
 func NewTagRepository(db *gorm.DB) *TagRepository { return &TagRepository{db: db} }
@@ -182,8 +170,6 @@ func (r *TagRepository) FindByIDs(ids []uint) ([]models.Tag, error) {
 	var tags []models.Tag
 	return tags, r.db.Where("id IN ?", ids).Find(&tags).Error
 }
-
-// ── BookmarkRepository ────────────────────────────────────────────────────────
 
 type BookmarkRepository struct{ db *gorm.DB }
 
@@ -212,8 +198,6 @@ func (r *BookmarkRepository) FindByUserAndManga(userID, mangaID uint) (*models.B
 	return &b, r.db.Where("user_id = ? AND manga_id = ?", userID, mangaID).First(&b).Error
 }
 
-// ── RatingRepository ──────────────────────────────────────────────────────────
-
 type RatingRepository struct{ db *gorm.DB }
 
 func NewRatingRepository(db *gorm.DB) *RatingRepository { return &RatingRepository{db: db} }
@@ -227,8 +211,6 @@ func (r *RatingRepository) FindByUserAndManga(userID, mangaID uint) (*models.Rat
 	var rating models.Rating
 	return &rating, r.db.Where("user_id = ? AND manga_id = ?", userID, mangaID).First(&rating).Error
 }
-
-// ── ProgressRepository ────────────────────────────────────────────────────────
 
 type ProgressRepository struct{ db *gorm.DB }
 

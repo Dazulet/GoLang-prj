@@ -10,8 +10,6 @@ import (
 	"github.com/mangalib/auth-service/internal/validators"
 )
 
-// ── AuthService ───────────────────────────────────────────────────────────────
-
 type AuthService struct {
 	users *repositories.UserRepository
 	cfg   *config.Config
@@ -75,12 +73,9 @@ func (s *AuthService) Login(req validators.LoginRequest) (*AuthResult, error) {
 	return &AuthResult{Token: token, User: *user}, nil
 }
 
-// ValidateToken is called by other services via HTTP to verify a JWT.
 func (s *AuthService) ValidateToken(tokenStr string) (*utils.Claims, error) {
 	return utils.ParseToken(tokenStr, s.cfg.JWTSecret)
 }
-
-// ── UserService ───────────────────────────────────────────────────────────────
 
 type UserService struct {
 	users *repositories.UserRepository

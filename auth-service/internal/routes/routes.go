@@ -34,7 +34,6 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	api := r.Group("/api")
 	{
-		// Публичные эндпоинты авторизации
 		auth := api.Group("/auth")
 		{
 			auth.POST("/register", authH.Register)
@@ -42,24 +41,20 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			auth.POST("/validate", authH.Validate)
 		}
 
-		// Защищенные эндпоинты
 		protected := api.Group("")
 		protected.Use(middleware.Auth(cfg.JWTSecret))
 		{
-			// Личный профиль
 			protected.GET("/users/me", userH.Me)
 			protected.PATCH("/users/me", userH.UpdateProfile)
 
-			// Эндпоинты для АДМИНА
 			admin := protected.Group("")
 			admin.Use(middleware.AdminOnly())
 			{
-				admin.GET("/users", userH.GetAllUsers)             // Исправлено: GET /api/users
-				admin.PATCH("/users/:id", userH.UpdateUserProfile) // Исправлено: PATCH /api/users/:id
+				admin.GET("/users", userH.GetAllUsers)
+				admin.PATCH("/users/:id", userH.UpdateUserProfile)
 			}
 		}
 
-		// Публичный профиль (нужен для Manga/Comment сервисов)
 		api.GET("/users/:id", userH.GetProfile)
 	}
 

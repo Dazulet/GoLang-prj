@@ -24,18 +24,14 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	r.Use(middleware.CORS())
 	r.Use(gin.Logger())
 
-	// Serve uploaded files
 	r.Static("/uploads", cfg.UploadDir)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"service": "manga", "status": "ok"})
 	})
 
-	// ── Resty v2 inter-service client ─────────────────────────────────────────
-	// Manga Service uses Resty v2 to call the Auth Service.
 	authClient := client.NewAuthClient(cfg.AuthServiceURL)
 
-	// ── Repositories ──────────────────────────────────────────────────────────
 	mangaRepo := repositories.NewMangaRepository(db)
 	chapterRepo := repositories.NewChapterRepository(db)
 	pageRepo := repositories.NewPageRepository(db)
@@ -45,7 +41,6 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	ratingRepo := repositories.NewRatingRepository(db)
 	progressRepo := repositories.NewProgressRepository(db)
 
-	// ── Services ──────────────────────────────────────────────────────────────
 	mangaSvc := services.NewMangaService(mangaRepo, genreRepo, tagRepo)
 	chapterSvc := services.NewChapterService(chapterRepo, pageRepo, mangaRepo)
 	genreSvc := services.NewGenreService(genreRepo)
@@ -54,7 +49,6 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	ratingSvc := services.NewRatingService(ratingRepo)
 	progressSvc := services.NewProgressService(progressRepo)
 
-	// ── Handlers ──────────────────────────────────────────────────────────────
 	mangaH := handlers.NewMangaHandler(mangaSvc, cfg)
 	chapterH := handlers.NewChapterHandler(chapterSvc, cfg)
 	genreTagH := handlers.NewGenreTagHandler(genreSvc, tagSvc)
@@ -65,7 +59,6 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	api := r.Group("/api")
 
-	// ── Public routes ─────────────────────────────────────────────────────────
 	manga := api.Group("/manga")
 	{
 		manga.GET("", mangaH.List)
@@ -78,11 +71,8 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	api.GET("/genres", genreTagH.ListGenres)
 	api.GET("/tags", genreTagH.ListTags)
 
-	// Inter-service proxy: Manga → Auth via Resty v2
-	// Clients can request user profiles through the Manga Service.
 	api.GET("/users/:id/profile", userProxyH.GetUserProfile)
 
-	// ── Protected routes ──────────────────────────────────────────────────────
 	protected := api.Group("")
 	protected.Use(middleware.Auth(cfg.JWTSecret))
 	{
@@ -96,7 +86,6 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		protected.POST("/progress", progressH.Update)
 		protected.GET("/progress", progressH.History)
 
-		// ── Admin only ────────────────────────────────────────────────────────
 		admin := protected.Group("")
 		admin.Use(middleware.AdminOnly())
 		{

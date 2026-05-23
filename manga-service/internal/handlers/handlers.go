@@ -18,8 +18,6 @@ func paramUint(c *gin.Context, key string) (uint, error) {
 	return uint(n), err
 }
 
-// ── MangaHandler ──────────────────────────────────────────────────────────────
-
 type MangaHandler struct {
 	svc *services.MangaService
 	cfg *config.Config
@@ -146,8 +144,6 @@ func (h *MangaHandler) UploadCover(c *gin.Context) {
 	utils.OK(c, gin.H{"cover": url})
 }
 
-// ── ChapterHandler ────────────────────────────────────────────────────────────
-
 type ChapterHandler struct {
 	svc *services.ChapterService
 	cfg *config.Config
@@ -269,8 +265,6 @@ func (h *ChapterHandler) UploadPages(c *gin.Context) {
 	utils.Created(c, pages)
 }
 
-// ── GenreTagHandler ───────────────────────────────────────────────────────────
-
 type GenreTagHandler struct {
 	genres *services.GenreService
 	tags   *services.TagService
@@ -326,8 +320,6 @@ func (h *GenreTagHandler) CreateTag(c *gin.Context) {
 	utils.Created(c, t)
 }
 
-// ── BookmarkHandler ───────────────────────────────────────────────────────────
-
 type BookmarkHandler struct{ svc *services.BookmarkService }
 
 func NewBookmarkHandler(svc *services.BookmarkService) *BookmarkHandler {
@@ -374,8 +366,6 @@ func (h *BookmarkHandler) Remove(c *gin.Context) {
 	utils.NoContent(c)
 }
 
-// ── RatingHandler ─────────────────────────────────────────────────────────────
-
 type RatingHandler struct{ svc *services.RatingService }
 
 func NewRatingHandler(svc *services.RatingService) *RatingHandler { return &RatingHandler{svc: svc} }
@@ -409,8 +399,6 @@ func (h *RatingHandler) GetMine(c *gin.Context) {
 	}
 	utils.OK(c, r)
 }
-
-// ── ProgressHandler ───────────────────────────────────────────────────────────
 
 type ProgressHandler struct{ svc *services.ProgressService }
 

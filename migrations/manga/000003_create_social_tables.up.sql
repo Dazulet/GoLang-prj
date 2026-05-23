@@ -1,4 +1,3 @@
--- Manga Service Migration: 000003_create_social_tables
 
 CREATE TABLE IF NOT EXISTS bookmarks (
     id         BIGSERIAL   PRIMARY KEY,

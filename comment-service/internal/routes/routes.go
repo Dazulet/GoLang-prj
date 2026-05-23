@@ -28,7 +28,6 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		c.JSON(http.StatusOK, gin.H{"service": "comment", "status": "ok"})
 	})
 
-	// ── Dependencies ──────────────────────────────────────────────────────────
 	authClient := client.NewAuthClient(cfg.AuthServiceURL)
 	commentRepo := repositories.NewCommentRepository(db)
 	commentSvc := services.NewCommentService(commentRepo, authClient)
@@ -36,10 +35,8 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	api := r.Group("/api")
 
-	// Public — anyone can read comments
 	api.GET("/comments", commentH.List)
 
-	// Protected — must be logged in
 	protected := api.Group("")
 	protected.Use(middleware.Auth(cfg.JWTSecret))
 	{

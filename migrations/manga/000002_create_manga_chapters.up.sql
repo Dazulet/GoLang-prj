@@ -1,4 +1,3 @@
--- Manga Service Migration: 000002_create_manga_chapters
 
 CREATE TABLE IF NOT EXISTS manga (
     id          BIGSERIAL    PRIMARY KEY,

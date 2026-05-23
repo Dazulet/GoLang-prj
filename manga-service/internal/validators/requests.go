@@ -1,7 +1,5 @@
 package validators
 
-// ── Manga ─────────────────────────────────────────────────────────────────────
-
 type CreateMangaRequest struct {
 	Title       string `json:"title"       binding:"required,min=1,max=500"`
 	AltTitle    string `json:"alt_title"   binding:"omitempty,max=500"`
@@ -28,8 +26,6 @@ type UpdateMangaRequest struct {
 	TagIDs      []uint  `json:"tag_ids"`
 }
 
-// ── Chapter ───────────────────────────────────────────────────────────────────
-
 type CreateChapterRequest struct {
 	Number float64 `json:"number" binding:"min=0"`
 	Title  string  `json:"title"  binding:"omitempty,max=500"`
@@ -42,29 +38,21 @@ type UpdateChapterRequest struct {
 	Volume *int     `json:"volume" binding:"omitempty,min=0"`
 }
 
-// ── Bookmark ──────────────────────────────────────────────────────────────────
-
 type UpsertBookmarkRequest struct {
 	MangaID uint   `json:"manga_id" binding:"required"`
 	Status  string `json:"status"   binding:"required,oneof=reading completed plan_to_read dropped on_hold"`
 }
-
-// ── Rating ────────────────────────────────────────────────────────────────────
 
 type UpsertRatingRequest struct {
 	MangaID uint `json:"manga_id" binding:"required"`
 	Score   int  `json:"score"    binding:"required,min=1,max=10"`
 }
 
-// ── Progress ──────────────────────────────────────────────────────────────────
-
 type UpdateProgressRequest struct {
 	ChapterID  uint `json:"chapter_id"  binding:"required"`
 	MangaID    uint `json:"manga_id"    binding:"required"`
 	PageNumber int  `json:"page_number" binding:"required,min=1"`
 }
-
-// ── Genre / Tag ───────────────────────────────────────────────────────────────
 
 type CreateGenreRequest struct {
 	Name string `json:"name" binding:"required,min=1,max=100"`

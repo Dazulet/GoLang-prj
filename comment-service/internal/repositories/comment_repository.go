@@ -16,7 +16,6 @@ func (r *CommentRepository) FindByID(id uint) (*models.Comment, error) {
 	return &c, r.db.First(&c, id).Error
 }
 
-// ListByManga returns top-level comments with their direct replies.
 func (r *CommentRepository) ListByManga(mangaID uint, limit, offset int) ([]models.Comment, int64, error) {
 	var total int64
 	r.db.Model(&models.Comment{}).

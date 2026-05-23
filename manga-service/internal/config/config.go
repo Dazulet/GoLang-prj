@@ -22,8 +22,6 @@ type Config struct {
 
 	JWTSecret string
 
-	// AuthServiceURL is the base URL of the Auth Service.
-	// Used by the Resty v2 client for inter-service calls.
 	AuthServiceURL string
 
 	UploadDir       string

@@ -13,8 +13,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// ── Password ─────────────────────────────────────────────────────────────────
-
 func HashPassword(plain string) (string, error) {
 	b, err := bcrypt.GenerateFromPassword([]byte(plain), 12)
 	if err != nil {
@@ -26,8 +24,6 @@ func HashPassword(plain string) (string, error) {
 func CheckPassword(hash, plain string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(plain)) == nil
 }
-
-// ── JWT ───────────────────────────────────────────────────────────────────────
 
 type Claims struct {
 	UserID uint   `json:"user_id"`
@@ -63,8 +59,6 @@ func ParseToken(tokenStr, secret string) (*Claims, error) {
 	}
 	return claims, nil
 }
-
-// ── HTTP Responses ────────────────────────────────────────────────────────────
 
 type Response struct {
 	Success bool        `json:"success"`
