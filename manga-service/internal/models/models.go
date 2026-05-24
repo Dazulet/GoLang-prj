@@ -116,6 +116,7 @@ type ReadingProgress struct {
 	MangaID    uint      `gorm:"not null;index"                                    json:"manga_id"`
 	PageNumber int       `gorm:"default:1"                                         json:"page_number"`
 	UpdatedAt  time.Time `                                                          json:"updated_at"`
+	Manga      Manga     `gorm:"foreignKey:MangaID"   json:"manga"`
 
 	Chapter Chapter `gorm:"foreignKey:ChapterID" json:"chapter,omitempty"`
 }

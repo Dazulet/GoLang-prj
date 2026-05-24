@@ -224,7 +224,12 @@ func (r *ProgressRepository) Upsert(p *models.ReadingProgress) error {
 
 func (r *ProgressRepository) ListByUser(userID uint) ([]models.ReadingProgress, error) {
 	var list []models.ReadingProgress
-	err := r.db.Preload("Chapter").Where("user_id = ?", userID).
-		Order("updated_at DESC").Find(&list).Error
+	err := r.db.
+		Preload("Manga").
+		Preload("Chapter").
+		Where("user_id = ?", userID).
+		Order("updated_at DESC").
+		Find(&list).Error
+
 	return list, err
 }
