@@ -55,7 +55,7 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	bookmarkH := handlers.NewBookmarkHandler(bookmarkSvc)
 	ratingH := handlers.NewRatingHandler(ratingSvc)
 	progressH := handlers.NewProgressHandler(progressSvc)
-	userProxyH := handlers.NewUserProxyHandler(authClient) // Resty v2 proxy
+	userProxyH := handlers.NewUserProxyHandler(authClient)
 
 	api := r.Group("/api")
 
