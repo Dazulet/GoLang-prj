@@ -48,7 +48,6 @@ func (r *CommentRepository) AddLike(userID, commentID uint) error {
 		if err := tx.Create(&models.CommentLike{UserID: userID, CommentID: commentID}).Error; err != nil {
 			return err
 		}
-		// Обновляем именно таблицу comments поле likes
 		return tx.Exec("UPDATE comments SET likes = likes + 1 WHERE id = ?", commentID).Error
 	})
 }

@@ -320,8 +320,6 @@ func (h *GenreTagHandler) CreateTag(c *gin.Context) {
 	utils.Created(c, t)
 }
 
-// --- BookmarkHandler ---
-
 type BookmarkHandler struct {
 	svc *services.BookmarkService
 }
@@ -330,7 +328,6 @@ func NewBookmarkHandler(svc *services.BookmarkService) *BookmarkHandler {
 	return &BookmarkHandler{svc: svc}
 }
 
-// GET /api/bookmarks
 func (h *BookmarkHandler) List(c *gin.Context) {
 	userID := middleware.CurrentUserID(c)
 	page, limit, _ := utils.ParsePagination(c)
@@ -342,19 +339,15 @@ func (h *BookmarkHandler) List(c *gin.Context) {
 	utils.Paginated(c, list, total, page, limit)
 }
 
-// POST /api/bookmarks
 func (h *BookmarkHandler) Upsert(c *gin.Context) {
 	uid := middleware.CurrentUserID(c)
 
-	// Используем валидатор, который уже есть в твоем проекте
 	var req validators.UpsertBookmarkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.BadRequest(c, "Validation failed: "+err.Error())
 		return
 	}
 
-	// ВАЖНО: Вызываем метод СЕРВИСА, а не репозитория
-	// Твой сервис сам внутри себя создаст модель Bookmark и вызовет репозиторий
 	res, err := h.svc.Upsert(uid, req)
 	if err != nil {
 		utils.InternalError(c)
@@ -364,16 +357,13 @@ func (h *BookmarkHandler) Upsert(c *gin.Context) {
 	utils.OK(c, res)
 }
 
-// DELETE /api/bookmarks/:mangaId
 func (h *BookmarkHandler) Remove(c *gin.Context) {
 	userID := middleware.CurrentUserID(c)
 
-	// ВАЖНО: имя "mangaId" должно совпадать с тем, что в routes.go
 	idStr := c.Param("mangaId")
 	mangaID, err := strconv.ParseUint(idStr, 10, 64)
 
 	if err != nil || mangaID == 0 {
-		// Оставляем твой проверочный текст, чтобы убедиться в обновлении кода
 		utils.BadRequest(c, "LINK_VERIFIED_HANDLER_UPDATED_ID_ERROR")
 		return
 	}

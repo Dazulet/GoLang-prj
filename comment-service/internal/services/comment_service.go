@@ -33,7 +33,6 @@ func (s *CommentService) Create(userID uint, req validators.CreateCommentRequest
 	return &c, nil
 }
 
-// ВАЖНО: добавили параметр currentUserID
 func (s *CommentService) ListByManga(mangaID uint, page, limit int, currentUserID uint) ([]models.Comment, int64, error) {
 	offset := (page - 1) * limit
 	comments, total, err := s.repo.ListByManga(mangaID, limit, offset)
@@ -44,15 +43,12 @@ func (s *CommentService) ListByManga(mangaID uint, page, limit int, currentUserI
 	userCache := make(map[uint]*models.UserInfo)
 
 	for i := range comments {
-		// 1. Обогащаем данными автора
 		comments[i].Author = s.getAuthorWithCache(comments[i].UserID, userCache)
 
-		// 2. Проверяем, лайкнул ли текущий юзер этот коммент
 		if currentUserID != 0 {
 			comments[i].IsLiked = s.repo.LikeExists(currentUserID, comments[i].ID)
 		}
 
-		// Обрабатываем ответы (Replies)
 		for j := range comments[i].Replies {
 			comments[i].Replies[j].Author = s.getAuthorWithCache(comments[i].Replies[j].UserID, userCache)
 			if currentUserID != 0 {
@@ -64,7 +60,6 @@ func (s *CommentService) ListByManga(mangaID uint, page, limit int, currentUserI
 	return comments, total, nil
 }
 
-// Вспомогательный метод для кеширования авторов (чтобы не спамить Auth-сервис)
 func (s *CommentService) getAuthorWithCache(userID uint, cache map[uint]*models.UserInfo) *models.UserInfo {
 	if info, ok := cache[userID]; ok {
 		return info

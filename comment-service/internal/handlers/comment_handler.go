@@ -24,9 +24,6 @@ func (h *CommentHandler) List(c *gin.Context) {
 
 	page, limit, _ := utils.ParsePagination(c)
 
-	// Пытаемся достать userID из токена (если он есть)
-	// Для этого GET запрос должен проходить через middleware.Auth,
-	// но мы сделаем его НЕОБЯЗАТЕЛЬНЫМ в роутах или просто проверим контекст.
 	userID, _ := c.Get("userID")
 	uid, _ := userID.(uint)
 
